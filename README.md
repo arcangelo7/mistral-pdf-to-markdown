@@ -1,6 +1,6 @@
 # Mistral PDF to Markdown Converter
 
-[![PyPI version](https://img.shields.io/pypi/v/mistral-pdf-to-markdown.svg)](https://pypi.org/project/mistral-pdf-to-markdown/)
+[![PyPI version](https://img.shields.io/pypi/v/mistral-pdf-to-markdown.svg)](https://pypi.org/project/mistral-pdf-to-markdown/) [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge.svg)](https://python-poetry.org/)
 
 A simple command-line tool to convert PDF files into Markdown format using the Mistral AI OCR API.
 This tool also extracts embedded images and saves them in a subdirectory relative to the output markdown file.
