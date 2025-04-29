@@ -58,7 +58,7 @@ jobs:
         run: npx semantic-release
 
       - name: Build and publish to PyPI
-        if: steps.semantic.outputs.new_release_published == 'true'
+        if: success()
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
