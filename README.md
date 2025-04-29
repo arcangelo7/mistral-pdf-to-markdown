@@ -1,9 +1,39 @@
 # Mistral PDF to Markdown Converter
 
+[![PyPI version](https://img.shields.io/pypi/v/mistral-pdf-to-markdown.svg)](https://pypi.org/project/mistral-pdf-to-markdown/)
+
 A simple command-line tool to convert PDF files into Markdown format using the Mistral AI OCR API.
 This tool also extracts embedded images and saves them in a subdirectory relative to the output markdown file.
 
 ## Installation
+
+You can install the package directly from PyPI using pip:
+
+```bash
+pip install mistral-pdf-to-markdown
+```
+
+### Global Installation (Recommended for CLI Usage)
+
+If you want to use the `pdf2md` command from anywhere in your system without activating a specific virtual environment, the recommended way is to use `pipx`:
+
+1.  **Install `pipx`** (if you don't have it already). Follow the official [pipx installation guide](https://pipx.pypa.io/stable/installation/). A common method is:
+    ```bash
+    python3 -m pip install --user pipx
+    python3 -m pipx ensurepath
+    ```
+    *(Restart your terminal after running `ensurepath`)*
+
+2.  **Install the package using `pipx`:**
+    ```bash
+    pipx install mistral-pdf-to-markdown
+    ```
+
+This installs the package in an isolated environment but makes the `pdf2md` command globally available.
+
+### Installation from Source
+
+Alternatively, if you want to install from the source:
 
 1.  **Clone the repository:**
     ```bash
