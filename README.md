@@ -7,7 +7,7 @@ This tool also extracts embedded images and saves them in a subdirectory relativ
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/arcangelo7/mistral-pdf-to-markdown.git
     cd mistral-pdf-to-markdown
     ```
 
