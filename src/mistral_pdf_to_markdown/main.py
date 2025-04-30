@@ -2,6 +2,7 @@ import base64
 import os
 import pathlib
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 import click
 from dotenv import load_dotenv
@@ -34,10 +35,83 @@ def convert(pdf_path, output, api_key):
     click.echo(f"Converting '{pdf_path}' to '{output}'...")
 
     try:
+
+        _convert_file(pdf_path, output, api_key)
+        click.echo(f"Successfully converted PDF to Markdown: '{output}'")
+        return True
+    except Exception as e:
+        click.echo(f"An error occurred: {e}", err=True)
+        return False
+
+@cli.command()
+@click.argument('directory_path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option('--output-dir', '-o', type=click.Path(file_okay=False), help='Output directory for markdown files. Defaults to same directory as input.')
+@click.option('--api-key', envvar='MISTRAL_API_KEY', help='Mistral API Key. Can also be set via MISTRAL_API_KEY environment variable.')
+@click.option('--max-workers', '-w', type=int, default=2, help='Maximum number of concurrent conversions. Default is 2.')
+def convert_dir(directory_path, output_dir, api_key, max_workers):
+    """Converts all PDF files in a directory to Markdown."""
+    load_dotenv()
+
+    if not api_key:
+        api_key = os.getenv('MISTRAL_API_KEY')
+
+    if not api_key:
+        click.echo("Error: Mistral API Key not found. Set MISTRAL_API_KEY environment variable or use --api-key option.", err=True)
+        return
+
+
+    if not output_dir:
+        output_dir = directory_path
+    else:
+
+        os.makedirs(output_dir, exist_ok=True)
+
+
+    pdf_files = []
+    for file in os.listdir(directory_path):
+        if file.lower().endswith('.pdf'):
+            pdf_files.append(os.path.join(directory_path, file))
+
+    if not pdf_files:
+        click.echo(f"No PDF files found in '{directory_path}'")
+        return
+
+    click.echo(f"Found {len(pdf_files)} PDF files to convert")
+
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = []
+        for pdf_path in pdf_files:
+
+            base_name = os.path.basename(pdf_path)
+            output_name = os.path.splitext(base_name)[0] + '.md'
+            output_path = os.path.join(output_dir, output_name)
+            
+
+            future = executor.submit(
+                _convert_file, 
+                pdf_path=pdf_path, 
+                output=output_path, 
+                api_key=api_key
+            )
+            futures.append((future, pdf_path, output_path))
+        
+
+        for future, pdf_path, output_path in futures:
+            try:
+                future.result()
+                click.echo(f"✅ Successfully converted '{pdf_path}' to '{output_path}'")
+            except Exception as e:
+                click.echo(f"❌ Failed to convert '{pdf_path}': {e}", err=True)
+
+
+def _convert_file(pdf_path, output, api_key):
+    """Internal function to convert a single PDF file to Markdown.
+    Used by both convert and convert_dir commands."""
+    try:
         client = Mistral(api_key=api_key)
 
-        # 1. Upload the file
-        click.echo("Uploading PDF...")
+
         with open(pdf_path, "rb") as f:
             uploaded_pdf = client.files.upload(
                 file={
@@ -46,15 +120,11 @@ def convert(pdf_path, output, api_key):
                 },
                 purpose="ocr"
             )
-        click.echo(f"File uploaded successfully. File ID: {uploaded_pdf.id}")
 
-        # 2. Get signed URL
-        click.echo("Getting signed URL...")
+
         signed_url = client.files.get_signed_url(file_id=uploaded_pdf.id)
-        click.echo("Signed URL obtained.")
 
-        # 3. Process with OCR
-        click.echo("Processing with Mistral OCR...")
+
         ocr_response = client.ocr.process(
             model="mistral-ocr-latest",
             document={
@@ -63,49 +133,41 @@ def convert(pdf_path, output, api_key):
             },
             include_image_base64=True
         )
-        click.echo("OCR processing complete.")
 
-        # 4. Extract markdown content and save images
-        click.echo("Extracting markdown and saving images...")
+
         final_markdown_parts = []
         output_path = pathlib.Path(output)
         image_dir = output_path.parent / (output_path.stem + "_images")
         try:
             image_dir.mkdir(parents=True, exist_ok=True)
-            click.echo(f"Image directory created/ensured: '{image_dir}'")
         except Exception as mkdir_err:
             click.echo(f"Warning: Could not create image directory '{image_dir}': {mkdir_err}", err=True)
 
         image_counter = 0
         processed_image_filenames = set()
 
-        # First pass: check markdown for image references
+
         for page in ocr_response.pages:
              page_markdown = page.markdown if hasattr(page, 'markdown') else ''
-             # Simple regex to find markdown image syntax ![alt](filename.ext)
-             # This helps identify expected image filenames
+
              found_images = re.findall(r"!\[.*?\]\((.*?)\)", page_markdown)
              processed_image_filenames.update(found_images)
 
-        click.echo(f"Found references to {len(processed_image_filenames)} image filenames in markdown.")
 
-        # Second pass: process pages and save images
         for page_index, page in enumerate(ocr_response.pages):
             page_markdown = page.markdown if hasattr(page, 'markdown') else ''
             images_saved_on_page = 0
             if hasattr(page, 'images') and page.images:
-                click.echo(f"  Processing images for page {page_index+1}...")
                 for img_index, image_obj in enumerate(page.images):
                     if hasattr(image_obj, 'image_base64') and image_obj.image_base64:
                         try:
                             base64_data = image_obj.image_base64
                             if ';base64,' in base64_data:
                                 base64_data = base64_data.split(';base64,', 1)[1]
-                                click.echo("    Stripped data URI prefix.")
 
                             image_data = base64.b64decode(base64_data)
 
-                            # --- Determine filename ---
+
                             image_filename = f"image_p{page_index}_i{img_index}.png"
                             potential_markdown_filename = None
                             for fname in processed_image_filenames:
@@ -116,10 +178,7 @@ def convert(pdf_path, output, api_key):
                             if potential_markdown_filename:
                                 base_name, _ = os.path.splitext(potential_markdown_filename)
                                 image_filename = base_name + ".png"
-                                click.echo(f"    Matched image to markdown reference base name: {base_name} -> {image_filename}")
-                            else:
-                                click.echo(f"    Using default filename: {image_filename}")
-
+                            
                             image_save_path = image_dir / image_filename
                             relative_image_path = image_dir.name + "/" + image_filename
 
@@ -128,7 +187,7 @@ def convert(pdf_path, output, api_key):
                             image_counter += 1
                             images_saved_on_page += 1
 
-                            # --- Modify markdown to use the correct relative path ---
+
                             original_filename_in_markdown = None
                             if image_filename in processed_image_filenames:
                                 original_filename_in_markdown = image_filename
@@ -140,37 +199,28 @@ def convert(pdf_path, output, api_key):
                                 new_link_pattern = f"]({relative_image_path})"
                                 if old_link_pattern in page_markdown:
                                     page_markdown = page_markdown.replace(old_link_pattern, new_link_pattern)
-                                    click.echo(f"    Updated markdown link: {original_filename_in_markdown} -> {relative_image_path}")
-                                else:
-                                     click.echo(f"    Warning: Could not find markdown link pattern '{old_link_pattern}' to replace.", err=True)
-                            # --- End Markdown modification ---
 
                         except Exception as img_err:
-                            click.echo(f"    Warning: Could not process image {img_index} on page {page_index+1}: {img_err}", err=True)
-
-                if images_saved_on_page > 0:
-                     click.echo(f"    Saved {images_saved_on_page} image(s) for page {page_index+1}.")
-
+                            pass
 
             final_markdown_parts.append(page_markdown)
 
-        markdown_content = "\\n\\n".join(final_markdown_parts)
-        click.echo(f"Extracted markdown. Processed {image_counter} images in '{image_dir}'.")
+        markdown_content = "\n\n".join(final_markdown_parts)
 
         with open(output, 'w', encoding='utf-8') as outfile:
             outfile.write(markdown_content)
 
-        click.echo(f"Successfully converted PDF to Markdown: '{output}'")
 
-        # 5. Delete the uploaded file
         try:
             client.files.delete(file_id=uploaded_pdf.id)
-            click.echo(f"Deleted uploaded file from Mistral: {uploaded_pdf.id}")
-        except Exception as delete_err:
-            click.echo(f"Warning: Could not delete uploaded file {uploaded_pdf.id}: {delete_err}", err=True)
+        except Exception:
+            pass
+
+        return True
 
     except Exception as e:
-        click.echo(f"An error occurred: {e}", err=True)
+        raise Exception(f"Error converting {pdf_path}: {str(e)}")
+
 
 if __name__ == '__main__':
     cli() 

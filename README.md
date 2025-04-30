@@ -61,7 +61,9 @@ Alternatively, if you want to install from the source:
     You can also pass the API key directly using the `--api-key` option.
 
 2.  **Run the conversion:**
-    The main command is `convert`.
+
+    ### Convert a Single PDF File
+    The `convert` command processes a single PDF file.
     ```bash
     poetry run pdf2md convert <path/to/your/document.pdf> [options]
     ```
@@ -70,10 +72,24 @@ Alternatively, if you want to install from the source:
     pdf2md convert <path/to/your/document.pdf> [options]
     ```
 
-**Options:**
+    **Options for Single File Conversion:**
+    *   `--output` or `-o`: Specify the path for the output Markdown file. If not provided, it defaults to the same name as the input PDF but with a `.md` extension (e.g., `document.md`).
+    *   `--api-key`: Provide the Mistral API key directly.
 
-*   `--output` or `-o`: Specify the path for the output Markdown file. If not provided, it defaults to the same name as the input PDF but with a `.md` extension (e.g., `document.md`).
-*   `--api-key`: Provide the Mistral API key directly.
+    ### Convert Multiple PDF Files from a Directory
+    The `convert-dir` command processes all PDF files in a specified directory.
+    ```bash
+    poetry run pdf2md convert-dir <path/to/directory/with/pdfs> [options]
+    ```
+    Or, if you have activated the virtual environment (`poetry shell`):
+    ```bash
+    pdf2md convert-dir <path/to/directory/with/pdfs> [options]
+    ```
+
+    **Options for Directory Conversion:**
+    *   `--output-dir` or `-o`: Specify the directory where output Markdown files will be saved. If not provided, it defaults to the same directory as the input PDFs.
+    *   `--api-key`: Provide the Mistral API key directly.
+    *   `--max-workers` or `-w`: Maximum number of concurrent conversions (default: 2). Increase this value to process multiple files in parallel for faster conversion.
 
 **Image Handling:**
 
@@ -81,14 +97,25 @@ The script will attempt to extract images embedded in the PDF.
 *   Images are saved in a subdirectory named `<output_filename_stem>_images` (e.g., if the output is `report.md`, images will be in `report_images/`).
 *   The generated Markdown file will contain relative links pointing to the images in this subdirectory.
 
-**Example:**
+**Examples:**
 
 ```bash
+# Convert a single PDF file
 poetry run pdf2md convert ./my_report.pdf -o ./output/report.md
 ```
 This command will create:
 *   `./output/report.md` (the markdown content)
 *   `./output/report_images/` (a directory containing extracted images)
+
+```bash
+# Convert all PDF files in a directory
+poetry run pdf2md convert-dir ./pdf_documents/ -o ./markdown_output/ -w 4
+```
+This command will:
+*   Process all PDF files in the `./pdf_documents/` directory
+*   Save the resulting Markdown files in the `./markdown_output/` directory
+*   Process up to 4 files concurrently
+*   Create image directories for each output file as needed
 
 An example output generated from `example.pdf` (included in the repository) can be found in `example.md`, with its corresponding images located in the `example_images/` directory.
 
