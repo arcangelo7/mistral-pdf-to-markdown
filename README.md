@@ -100,16 +100,22 @@ The script will attempt to extract images embedded in the PDF.
 **Examples:**
 
 ```bash
-# Convert a single PDF file
+# Convert a single PDF file (when installed with Poetry)
 poetry run pdf2md convert ./my_report.pdf -o ./output/report.md
+
+# Convert a single PDF file (when installed globally with pipx)
+pdf2md convert ./my_report.pdf -o ./output/report.md
 ```
 This command will create:
 *   `./output/report.md` (the markdown content)
 *   `./output/report_images/` (a directory containing extracted images)
 
 ```bash
-# Convert all PDF files in a directory
+# Convert all PDF files in a directory (when installed with Poetry)
 poetry run pdf2md convert-dir ./pdf_documents/ -o ./markdown_output/ -w 4
+
+# Convert all PDF files in a directory (when installed globally with pipx)
+pdf2md convert-dir ./pdf_documents/ -o ./markdown_output/ -w 4
 ```
 This command will:
 *   Process all PDF files in the `./pdf_documents/` directory
@@ -117,16 +123,7 @@ This command will:
 *   Process up to 4 files concurrently
 *   Create image directories for each output file as needed
 
-An example output generated from `example.pdf` (included in the repository) can be found in `example.md`, with its corresponding images located in the `example_images/` directory.
-
-## Development
-
-Use `poetry shell` to activate the virtual environment for development.
-
-Run tests (if any) using:
-```bash
-poetry run pytest
-```
+An example output generated from `example.pdf` (included in the repository) can be found in [example.md](example.md), with its corresponding images located in the `example_images/` directory.
 
 ## License
 
