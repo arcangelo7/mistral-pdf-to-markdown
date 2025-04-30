@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.0.1...v1.1.0) (2025-04-30)
+
+
+### Features
+
+* Add directory conversion support and refactor single file conversion ([6d494cf](https://github.com/arcangelo7/mistral-pdf-to-markdown/commit/6d494cf1fd530760dd9c278485d14df141976f69))
+
 ## [1.0.1](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.0.0...v1.0.1) (2025-04-29)
 
 
