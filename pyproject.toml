@@ -11,6 +11,8 @@ python = "^3.10"
 mistralai = "^1.7.0"
 click = "^8.1.8"    
 python-dotenv = "^1.1.0"
+pypandoc = "^1.15"
+weasyprint = "^66.0"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^6.0.1"

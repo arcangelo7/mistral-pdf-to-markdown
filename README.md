@@ -3,7 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/mistral-pdf-to-markdown.svg)](https://pypi.org/project/mistral-pdf-to-markdown/)
 ![Poetry](https://img.shields.io/badge/poetry-2.1.2-blue?logo=poetry&logoColor=blue)
 
-A simple command-line tool to convert PDF files into Markdown format using the Mistral AI OCR API.
+A simple command-line tool to convert PDF and EPUB files into Markdown format using the Mistral AI OCR API.
 This tool also extracts embedded images and saves them in a subdirectory relative to the output markdown file.
 
 ## Installation
@@ -39,13 +39,17 @@ Alternatively, if you want to install from the source:
 1.  **Clone the repository:**
     ```bash
     git clone https://github.com/arcangelo7/mistral-pdf-to-markdown.git
-    cd mistral-pdf-to-markdown 
+    cd mistral-pdf-to-markdown
     ```
 
 2.  **Install dependencies using Poetry:**
     ```bash
     poetry install
     ```
+
+### Additional Requirements for EPUB Support
+
+To convert EPUB files, you need to install `pandoc`. See the [official installation guide](https://pandoc.org/installing.html) for your operating system.
 
 ## Usage
 
@@ -62,8 +66,8 @@ Alternatively, if you want to install from the source:
 
 2.  **Run the conversion:**
 
-    ### Convert a Single PDF File
-    The `convert` command processes a single PDF file.
+    ### Convert a Single PDF or EPUB File
+    The `convert` command processes a single PDF or EPUB file.
     ```bash
     poetry run pdf2md convert <path/to/your/document.pdf> [options]
     ```
@@ -73,55 +77,42 @@ Alternatively, if you want to install from the source:
     ```
 
     **Options for Single File Conversion:**
-    *   `--output` or `-o`: Specify the path for the output Markdown file. If not provided, it defaults to the same name as the input PDF but with a `.md` extension (e.g., `document.md`).
+    *   `--output` or `-o`: Specify the path for the output Markdown file. If not provided, it defaults to the same name as the input file but with a `.md` extension (e.g., `document.md`).
     *   `--api-key`: Provide the Mistral API key directly.
 
-    ### Convert Multiple PDF Files from a Directory
-    The `convert-dir` command processes all PDF files in a specified directory.
+    ### Convert Multiple PDF and EPUB Files from a Directory
+    The `convert-dir` command processes all PDF and EPUB files in a specified directory.
     ```bash
-    poetry run pdf2md convert-dir <path/to/directory/with/pdfs> [options]
+    poetry run pdf2md convert-dir <path/to/directory/with/files> [options]
     ```
     Or, if you have activated the virtual environment (`poetry shell`):
     ```bash
-    pdf2md convert-dir <path/to/directory/with/pdfs> [options]
+    pdf2md convert-dir <path/to/directory/with/files> [options]
     ```
 
     **Options for Directory Conversion:**
-    *   `--output-dir` or `-o`: Specify the directory where output Markdown files will be saved. If not provided, it defaults to the same directory as the input PDFs.
+    *   `--output-dir` or `-o`: Specify the directory where output Markdown files will be saved. If not provided, it defaults to the same directory as the input files.
     *   `--api-key`: Provide the Mistral API key directly.
     *   `--max-workers` or `-w`: Maximum number of concurrent conversions (default: 2). Increase this value to process multiple files in parallel for faster conversion.
 
 **Image Handling:**
 
-The script will attempt to extract images embedded in the PDF.
+The script will attempt to extract images embedded in the document.
 *   Images are saved in a subdirectory named `<output_filename_stem>_images` (e.g., if the output is `report.md`, images will be in `report_images/`).
 *   The generated Markdown file will contain relative links pointing to the images in this subdirectory.
 
 **Examples:**
 
 ```bash
-# Convert a single PDF file (when installed with Poetry)
+# Convert a single PDF file (output: ./my_report.md)
+poetry run pdf2md convert ./my_report.pdf
+
+# Convert with custom output path
 poetry run pdf2md convert ./my_report.pdf -o ./output/report.md
 
-# Convert a single PDF file (when installed globally with pipx)
-pdf2md convert ./my_report.pdf -o ./output/report.md
+# Convert all files in a directory with 4 concurrent workers
+poetry run pdf2md convert-dir ./documents/ -o ./markdown_output/ -w 4
 ```
-This command will create:
-*   `./output/report.md` (the markdown content)
-*   `./output/report_images/` (a directory containing extracted images)
-
-```bash
-# Convert all PDF files in a directory (when installed with Poetry)
-poetry run pdf2md convert-dir ./pdf_documents/ -o ./markdown_output/ -w 4
-
-# Convert all PDF files in a directory (when installed globally with pipx)
-pdf2md convert-dir ./pdf_documents/ -o ./markdown_output/ -w 4
-```
-This command will:
-*   Process all PDF files in the `./pdf_documents/` directory
-*   Save the resulting Markdown files in the `./markdown_output/` directory
-*   Process up to 4 files concurrently
-*   Create image directories for each output file as needed
 
 An example output generated from `example.pdf` (included in the repository) can be found in [example.md](example.md), with its corresponding images located in the `example_images/` directory.
 
