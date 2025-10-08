@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.1.0...v1.2.0) (2025-10-08)
+
+
+### Features
+
+* Add EPUB file format support [release] ([8f7f6d1](https://github.com/arcangelo7/mistral-pdf-to-markdown/commit/8f7f6d1560b145e7a0798ae6c3dffa91d86fb854))
+
 # [1.1.0](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.0.1...v1.1.0) (2025-04-30)
 
 
