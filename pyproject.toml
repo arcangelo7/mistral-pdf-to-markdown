@@ -9,6 +9,7 @@ authors = [
 ]
 dependencies = [
     "click>=8.4.2",
+    "httpx>=0.28.1",
     "mistralai>=2.6.0",
     "pypandoc>=1.17",
     "python-dotenv>=1.2.2",
@@ -21,6 +22,7 @@ pdf2md = "mistral_pdf_to_markdown.main:cli"
 [dependency-groups]
 dev = [
     "pyright>=1.1.411",
+    "ruff>=0.15.20",
 ]
 
 [tool.pyright]
@@ -28,6 +30,17 @@ include = ["src"]
 pythonVersion = "3.10"
 stubPath = "typings"
 typeCheckingMode = "strict"
+
+[tool.ruff]
+src = ["src", "typings"]
+target-version = "py310"
+
+[tool.ruff.lint]
+ignore = ["COM812", "D"]
+select = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"typings/pypandoc/__init__.pyi" = ["A002"]
 
 [build-system]
 requires = ["uv_build>=0.9.8,<0.10.0"]
