@@ -20,8 +20,14 @@ pdf2md = "mistral_pdf_to_markdown.main:cli"
 
 [dependency-groups]
 dev = [
-    "isort>=8.0.1",
+    "pyright>=1.1.411",
 ]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.10"
+stubPath = "typings"
+typeCheckingMode = "strict"
 
 [build-system]
 requires = ["uv_build>=0.9.8,<0.10.0"]
