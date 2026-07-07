@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.2.0...v1.2.1) (2026-07-07)
+
+
+### Bug Fixes
+
+* harden lint checks [release] ([1249f49](https://github.com/arcangelo7/mistral-pdf-to-markdown/commit/1249f4989087443a9b33e8436981559c9ea0f4be))
+
 # [1.2.0](https://github.com/arcangelo7/mistral-pdf-to-markdown/compare/v1.1.0...v1.2.0) (2025-10-08)
 
 
