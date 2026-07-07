@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 import click
 import pypandoc
 from dotenv import load_dotenv
-from mistralai import Mistral
+from mistralai.client import Mistral
 
 
 def _convert_epub_to_pdf(epub_path):
@@ -287,4 +287,4 @@ def _convert_file(file_path, output, api_key):
 
 
 if __name__ == '__main__':
-    cli() 
+    cli()
