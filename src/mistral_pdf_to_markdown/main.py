@@ -188,7 +188,7 @@ def convert(file_path: str, output: str | None, api_key: str | None) -> bool | N
 @click.option(
     "--max-workers",
     "-w",
-    type=int,
+    type=click.IntRange(1),
     default=2,
     help="Maximum number of concurrent conversions. Default is 2.",
 )
